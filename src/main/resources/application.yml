@@ -1,0 +1,12 @@
+server:
+    port: 8080
+
+spring:
+    messaging:
+        broker:
+            stomp:
+                endpoint: /ws
+                allowed-origins: "*"
+            simple:
+                broker: /topic
+            application-destination-prefix: /app

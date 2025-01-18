@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Multi-Tab Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #allMessages {
+            list-style-type: none;
+            padding: 0;
+        }
+        .message {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+        .sent {
+            background-color: #d1e7dd;
+            text-align: left;
+            margin-left: 0;
+        }
+        .received {
+            background-color: #f8d7da;
+            text-align: right;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h2>WebSocket Multi-Tab Test</h2>
+
+<!-- Input box for message -->
+<input type="text" id="messageInput" placeholder="Type your message here">
+<button onclick="sendMessage()">Send</button>
+
+<!-- Display area for sent and received messages -->
+<h3>All Messages:</h3>
+<ul id="allMessages"></ul>
+
+<script type="text/javascript">
+    // Initialize WebSocket and Client ID
+    const socket = new SockJS('http://localhost:8080/ws');
+    let stompClient;
+    const clientId = Math.random().toString(36).substring(7); // Unique ID for each client
+
+    function connectAndSubscribe() {
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to the topic
+            stompClient.subscribe('/topic/notification', function (message) {
+                const receivedMessage = JSON.parse(message.body);
+                console.log('Received Message: ', receivedMessage);
+
+                // Check if the message was sent by this client
+                if (receivedMessage.clientId === clientId) {
+                    displayMessage(receivedMessage.message, 'sent');
+                } else {
+                    displayMessage(receivedMessage.message, 'received');
+                }
+            });
+        }, function (error) {
+            console.error('STOMP connection error: ', error);
+        });
+    }
+
+    function sendMessage() {
+        if (stompClient && stompClient.connected) {
+            const message = document.getElementById('messageInput').value;
+            if (!message.trim()) {
+                alert("Message cannot be empty.");
+                return;
+            }
+            const messageObject = { message, clientId }; // Include clientId in the payload
+            stompClient.send("/app/send", {}, JSON.stringify(messageObject)); // Send the message
+            document.getElementById('messageInput').value = ''; // Reset input box
+        } else {
+            console.log('STOMP client not connected. Unable to send message.');
+        }
+    }
+
+    function displayMessage(message, type) {
+        const messageList = document.getElementById('allMessages');
+        const messageElement = document.createElement('li');
+        messageElement.textContent = message;
+        messageElement.className = `message ${type}`;
+        messageList.appendChild(messageElement);
+    }
+
+    // Handle WebSocket events
+    socket.onopen = function () {
+        console.log("SockJS connection opened.");
+    };
+
+    socket.onclose = function () {
+        console.log("SockJS connection closed.");
+    };
+
+    socket.onerror = function (error) {
+        console.error("SockJS connection error: ", error);
+    };
+
+    // Connect to the WebSocket
+    connectAndSubscribe();
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Multi-Tab Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.0/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #allMessages {
+            list-style-type: none;
+            padding: 0;
+        }
+        .message {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+        }
+        .sent {
+            background-color: #d1e7dd;
+            text-align: left;
+            margin-left: 0;
+        }
+        .received {
+            background-color: #f8d7da;
+            text-align: right;
+            margin-left: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h2>WebSocket Multi-Tab Test</h2>
+
+<!-- Input box for message -->
+<input type="text" id="messageInput" placeholder="Type your message here">
+<button onclick="sendMessage()">Send</button>
+
+<!-- Display area for sent and received messages -->
+<h3>All Messages:</h3>
+<ul id="allMessages"></ul>
+
+<script type="text/javascript">
+    // Initialize WebSocket and Client ID
+    const socket = new SockJS('http://localhost:8080/ws');
+    let stompClient;
+    const clientId = Math.random().toString(36).substring(7); // Unique ID for each client
+
+    function connectAndSubscribe() {
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to the topic
+            stompClient.subscribe('/topic/notification', function (message) {
+                const receivedMessage = JSON.parse(message.body);
+                console.log('Received Message: ', receivedMessage);
+
+                // Check if the message was sent by this client
+                if (receivedMessage.clientId === clientId) {
+                    displayMessage(receivedMessage.message, 'sent');
+                } else {
+                    displayMessage(receivedMessage.message, 'received');
+                }
+            });
+        }, function (error) {
+            console.error('STOMP connection error: ', error);
+        });
+    }
+
+    function sendMessage() {
+        if (stompClient && stompClient.connected) {
+            const message = document.getElementById('messageInput').value;
+            if (!message.trim()) {
+                alert("Message cannot be empty.");
+                return;
+            }
+            const messageObject = { message, clientId }; // Include clientId in the payload
+            stompClient.send("/app/send", {}, JSON.stringify(messageObject)); // Send the message
+            document.getElementById('messageInput').value = ''; // Reset input box
+        } else {
+            console.log('STOMP client not connected. Unable to send message.');
+        }
+    }
+
+    function displayMessage(message, type) {
+        const messageList = document.getElementById('allMessages');
+        const messageElement = document.createElement('li');
+        messageElement.textContent = message;
+        messageElement.className = `message ${type}`;
+        messageList.appendChild(messageElement);
+    }
+
+    // Handle WebSocket events
+    socket.onopen = function () {
+        console.log("SockJS connection opened.");
+    };
+
+    socket.onclose = function () {
+        console.log("SockJS connection closed.");
+    };
+
+    socket.onerror = function (error) {
+        console.error("SockJS connection error: ", error);
+    };
+
+    // Connect to the WebSocket
+    connectAndSubscribe();
+</script>
+
+</body>
+</html>
